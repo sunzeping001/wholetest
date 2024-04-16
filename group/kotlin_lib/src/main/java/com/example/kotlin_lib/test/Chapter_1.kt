@@ -37,8 +37,16 @@ fun whenFun(obj: Any) {
 }
 
 class Test {
-    fun go():String {
+    fun go(): String {
         return "good"
+    }
+}
+
+fun isTestFunc(obj: Any) {
+    when (obj) {
+        is String -> println("obj length is ${obj.toString().length}")
+        is Int -> println("obj num is $obj")
+        is Long -> println("obj long is $obj")
     }
 }
 
@@ -58,9 +66,10 @@ fun main() {
         else if (i % 4 == 3)
             whenFun(234L)
     }
-    var ri: Test? = null
-    var nice = ri?.go()
-    println(nice?.length)
+//    var ri: Test? = null
+//    var nice = ri?.go()
+//    println(nice?.length)
+    isTestFunc(3456L)
 
 }
 
