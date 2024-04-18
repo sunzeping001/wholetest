@@ -2,6 +2,7 @@ package com.example.pluginproject;
 
 import android.app.ActivityManager;
 import android.content.Context;
+import android.content.Intent;
 import android.net.TrafficStats;
 import android.net.Uri;
 import android.os.Build;
@@ -18,7 +19,10 @@ import android.widget.TextView;
 
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 
+import com.example.pluginproject.duer.NativeStarter;
+import com.example.pluginproject.server.HttpService;
 import com.example.pluginproject.util.HttpClient;
 
 import java.io.BufferedReader;
@@ -30,6 +34,10 @@ public class MainActivity extends AppCompatActivity {
 
     private TextView show;
     private Button start;
+    private Button startServer;
+    private Button stopServer;
+    private Button nativeStart;
+
     private static final String TAG = "MainActivity";
 
     private int getThreadCount(StringBuffer sb) {
@@ -155,11 +163,35 @@ public class MainActivity extends AppCompatActivity {
     private void initView() {
         show = findViewById(R.id.show);
         start = findViewById(R.id.start);
+        startServer = findViewById(R.id.startServer);
+        stopServer = findViewById(R.id.stopServer);
+        nativeStart = findViewById(R.id.nativeStart);
         start.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 start();
                 collect();
+            }
+        });
+        startServer.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this, HttpService.class);
+                ContextCompat.startForegroundService(MainActivity.this, intent);
+            }
+        });
+        stopServer.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this, HttpService.class);
+                stopService(intent);
+            }
+        });
+        nativeStart.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String result = NativeStarter.getInstance().start();
+                show.setText(result);
             }
         });
     }
@@ -176,7 +208,7 @@ public class MainActivity extends AppCompatActivity {
                     try {
                         Uri url = Uri.parse("https://qq.com");
                         String result = HttpClient.getInstance().get(url.toString());
-                        Log.i(TAG, "start: " + result);
+//                        Log.i(TAG, "start: " + result);
                         Thread.sleep(1000);
                     } catch (InterruptedException e) {
                         e.printStackTrace();

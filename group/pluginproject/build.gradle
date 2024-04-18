@@ -12,6 +12,17 @@ android {
         targetSdk 32
         versionCode 1
         versionName "1.0"
+
+        externalNativeBuild {
+            cmake {
+                abiFilters "armeabi-v7a"
+                arguments '-DANDROID_PLATFORM=android-19'
+                cppFlags "-std=c++11"
+            }
+        }
+        ndk {
+            abiFilters "armeabi-v7a"
+        }
     }
 
     buildTypes {
@@ -24,9 +35,18 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+
+    externalNativeBuild {
+        cmake {
+            path "src/main/cpp/CMakeLists.txt"
+            version "3.18.1"
+        }
+    }
+    ndkVersion '21.0.6113669'
 }
 
 dependencies {
+
 //    implementation 'androidx.core:core-ktx:1.7.0'
     implementation 'androidx.appcompat:appcompat:1.3.1'
     implementation 'com.google.android.material:material:1.4.0'
