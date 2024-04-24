@@ -13,6 +13,7 @@ import android.util.Log;
 import androidx.core.app.NotificationCompat;
 
 import com.example.pluginproject.R;
+import com.example.pluginproject.duer.NativeStarter;
 import com.example.pluginproject.util.HttpClient;
 
 public class HttpService extends Service {
@@ -42,9 +43,25 @@ public class HttpService extends Service {
         }
     };
 
+    private Runnable callNative = new Runnable() {
+        @Override
+        public void run() {
+            Log.i(TAG, "xsgg---server start---");
+            while (true) {
+                Log.i(TAG, "xsgg---server start while---");
+                try {
+                    NativeStarter.getInstance().start();
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            }
+        }
+    };
+
     private void doWork() {
         isRunning = true;
-        new Thread(httpCall).start();
+//        new Thread(httpCall).start();
+        new Thread(callNative).start();
     }
 
     @Override
@@ -79,11 +96,13 @@ public class HttpService extends Service {
         notificationManager.cancel(NOTIFICATION_ID);
         isRunning = false;
         Log.i(TAG, "xsgg---server stop");
+        System.exit(0);
     }
 
     private void createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationChannel channel = new NotificationChannel(CHANNEL_ID, CHANNEL_NAME, NotificationManager.IMPORTANCE_DEFAULT);
+            NotificationChannel channel = new NotificationChannel(CHANNEL_ID, CHANNEL_NAME,
+                    NotificationManager.IMPORTANCE_DEFAULT);
             notificationManager.createNotificationChannel(channel);
         }
     }

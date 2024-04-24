@@ -169,7 +169,7 @@ public class MainActivity extends AppCompatActivity {
         start.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                start();
+//                start();
                 collect();
             }
         });
@@ -190,8 +190,19 @@ public class MainActivity extends AppCompatActivity {
         nativeStart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String result = NativeStarter.getInstance().start();
-                show.setText(result);
+                StringBuffer result = new StringBuffer();
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        result.append(NativeStarter.getInstance().start());
+                        MainActivity.this.runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                show.setText(result);
+                            }
+                        });
+                    }
+                }).start();
             }
         });
     }

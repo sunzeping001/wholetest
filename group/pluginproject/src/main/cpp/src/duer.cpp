@@ -1,6 +1,10 @@
 #include <jni.h>
 #include <string>
 #include "my_fork.h"
+#include <unistd.h>
+#include <cstdlib>
+#include <cstdio>
+#include "fork_log.h"
 
 //extern "C" JNIEXPORT jstring JNICALL
 //Java_com_example_pluginlib_NativeLib_stringFromJNI(
