@@ -32,7 +32,7 @@ public class HttpClient {
                 .connectTimeout(30, TimeUnit.SECONDS)
                 .readTimeout(30,
                         TimeUnit.SECONDS)
-                .addInterceptor(loggingInterceptor)
+//                .addInterceptor(loggingInterceptor)
                 .build();
     }
 
@@ -63,7 +63,7 @@ public class HttpClient {
                 response = call.execute();
                 int code = response.code();
                 result = response.body().string();
-                Log.i(TAG, "code is: " + code /*+ ", result is: " + result*/);
+                Log.i(TAG, "code is: " + code + ", result is: " + result);
             } catch (IOException e) {
                 e.printStackTrace();
                 result = e.getLocalizedMessage();

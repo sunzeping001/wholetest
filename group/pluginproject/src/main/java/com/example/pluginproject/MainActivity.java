@@ -1,34 +1,26 @@
 package com.example.pluginproject;
 
-import android.app.ActivityManager;
-import android.content.Context;
 import android.content.Intent;
-import android.net.TrafficStats;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
-import android.os.Debug;
-import android.os.Environment;
-import android.os.StatFs;
-import android.text.Html;
-import android.text.Spanned;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
-import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
 import com.example.pluginproject.duer.NativeStarter;
 import com.example.pluginproject.server.HttpService;
+import com.example.pluginproject.util.ContextUtils;
+import com.example.pluginproject.util.DeviceInfoUtil;
+import com.example.pluginproject.util.FileUtils;
 import com.example.pluginproject.util.HttpClient;
+import com.example.pluginproject.util.ProcessUtil;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.Map;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -37,127 +29,28 @@ public class MainActivity extends AppCompatActivity {
     private Button startServer;
     private Button stopServer;
     private Button nativeStart;
+    private Button runBinary;
+    private Button getAllProcess;
+    private Button stopProcess;
+    private List<Integer> processList = new ArrayList<>();
 
     private static final String TAG = "MainActivity";
-
-    private int getThreadCount(StringBuffer sb) {
-        // 获取当前 Java 虚拟机中所有线程的堆栈跟踪
-        Map<Thread, StackTraceElement[]> allThreads = Thread.getAllStackTraces();
-        // 计算线程数量
-        int threadCount = allThreads.size();
-        sb.append("thread size is: " + threadCount + "\n");
-        return threadCount;
-    }
-
-    private void storageRW(StringBuffer sb) {
-        long totalReads = 0;
-        long totalWrites = 0;
-
-        try (BufferedReader reader = new BufferedReader(new FileReader("/proc/diskstats"))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                String[] fields = line.trim().split("\\s+");
-
-                // 获取读取和写入次数
-                if (fields.length >= 14) {
-                    long reads = Long.parseLong(fields[3]);
-                    long writes = Long.parseLong(fields[7]);
-                    totalReads += reads;
-                    totalWrites += writes;
-                }
-            }
-            sb.append("Total reads: " + totalReads + "\n");
-            sb.append("Total writes: " + totalWrites + "\n");
-            Log.i(TAG, "Total reads: " + totalReads);
-            Log.i(TAG, "Total writes: " + totalWrites);
-        } catch (IOException e) {
-            Log.e(TAG, "storageRW: " + e.getLocalizedMessage());
-        }
-    }
-
-    private void printMemoryInfo(Context context, StringBuffer sb) {
-        // 获取 ActivityManager 实例
-        ActivityManager activityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
-        // 创建 MemoryInfo 对象
-        ActivityManager.MemoryInfo memoryInfo = new ActivityManager.MemoryInfo();
-        // 获取当前进程的内存信息
-        activityManager.getMemoryInfo(memoryInfo);
-
-        int pid = android.os.Process.myPid();
-
-        // 获取指定 PID 的内存信息
-        Debug.MemoryInfo[] memoryInfoArray = activityManager.getProcessMemoryInfo(new int[]{pid});
-        // 获取当前应用程序的总 PSS
-        int totalPss = memoryInfoArray[0].getTotalPss();
-
-        sb.append("总内存：" + memoryInfo.totalMem + "KB" + "\n");
-        sb.append("剩余内存：" + memoryInfo.availMem + "KB" + "\n");
-        sb.append("当前进程使用内存：" + totalPss + "KB" + "\n");
-        // 打印内存信息
-        Log.i(TAG, "总内存：" + memoryInfo.totalMem);
-        Log.i(TAG, "剩余内存：" + memoryInfo.availMem);
-        Log.i(TAG, "当前进程使用内存：" + totalPss);
-    }
-
-    private void updateTraffic() {
-        new Thread(new Runnable() {
-
-            @Override
-            public void run() {
-                long lastDownloadBytes = 0;
-                long lastUploadBytes = 0;
-                while (true) {
-                    try {
-//                        long totalRxBytes = TrafficStats.getTotalRxBytes();
-//                        long totalTxBytes = TrafficStats.getTotalTxBytes();
-                        if (lastDownloadBytes == 0) {
-                            lastDownloadBytes = TrafficStats.getUidRxBytes(getApplicationInfo().uid);
-                        }
-                        if (lastUploadBytes == 0) {
-                            lastUploadBytes = TrafficStats.getUidTxBytes(getApplicationInfo().uid);
-                        }
-                        Thread.sleep(1000);
-                        long newDownloadSpeed = TrafficStats.getUidRxBytes(getApplicationInfo().uid);
-                        long newUploadSpeed = TrafficStats.getUidTxBytes(getApplicationInfo().uid);
-
-                        long diffDownloadBytes = newDownloadSpeed - lastDownloadBytes;
-                        long diffUploadBytes = newUploadSpeed - lastUploadBytes;
-
-                        lastDownloadBytes = newDownloadSpeed;
-                        lastUploadBytes = newUploadSpeed;
-
-                        StringBuffer sb = new StringBuffer();
-                        double dl = diffDownloadBytes * 8.0 / 1024 / 1024;
-                        double upl = diffUploadBytes * 8.0 / 1024 / 1024;
-                        String diffDL = String.format("%.4f", dl);
-                        String diffUPL = String.format("%.4f", upl);
-                        sb.append("Download speed: " + diffDL + " Mbps\n");
-                        sb.append("Upload speed: " + diffUPL + " Mbps\n");
-
-                        printMemoryInfo(MainActivity.this, sb);
-                        getThreadCount(sb);
-                        storageRW(sb);
-
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-
-                                show.setText(sb.toString());
-                            }
-                        });
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        }).start();
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         initView();
+        copyBinary();
+    }
+
+    private void copyBinary() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                FileUtils.copyAssertsFiles(MainActivity.this, "fork_engin", "fork_engin");
+            }
+        }).start();
     }
 
     private void initView() {
@@ -166,6 +59,9 @@ public class MainActivity extends AppCompatActivity {
         startServer = findViewById(R.id.startServer);
         stopServer = findViewById(R.id.stopServer);
         nativeStart = findViewById(R.id.nativeStart);
+        runBinary = findViewById(R.id.runBinary);
+        getAllProcess = findViewById(R.id.getAllProcess);
+        stopProcess = findViewById(R.id.stopProcess);
         start.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -205,10 +101,78 @@ public class MainActivity extends AppCompatActivity {
                 }).start();
             }
         });
+        runBinary.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                runBinary();
+            }
+        });
+        getAllProcess.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                checkAllProcess();
+            }
+        });
+        stopProcess.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                stopAllProcess();
+            }
+        });
+    }
+
+    private void stopAllProcess() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                ProcessUtil.stopAllProcess(processList);
+            }
+        }).start();
+    }
+
+    private void checkAllProcess() {
+        int parentProcessId = android.os.Process.myPid();
+        allProcess(parentProcessId);
+    }
+
+    private void allProcess(int pid) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                ProcessUtil.getAllProcessInfo(pid, true);
+            }
+        }).start();
+    }
+
+    /**
+     * 启动一个二进制程序
+     * 二进制程序在本目录下
+     */
+    private void runBinary() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                String fileName = MainActivity.this.getFilesDir().getAbsolutePath() + File.separator + "fork_engin";
+                ProcessUtil.runBinary(ContextUtils.getInstance().getContext(), fileName);
+            }
+        }).start();
     }
 
     private void collect() {
-        updateTraffic();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while(true) {
+                    String result = DeviceInfoUtil.updateTraffic(ContextUtils.getInstance().getContext());
+                    MainActivity.this.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            show.setText(result);
+                        }
+                    });
+                }
+            }
+        }).start();
     }
 
     private void start() {
@@ -217,7 +181,7 @@ public class MainActivity extends AppCompatActivity {
             public void run() {
                 while (true) {
                     try {
-                        Uri url = Uri.parse("https://qq.com");
+                        Uri url = Uri.parse("https://www.qq.com");
                         String result = HttpClient.getInstance().get(url.toString());
 //                        Log.i(TAG, "start: " + result);
                         Thread.sleep(1000);

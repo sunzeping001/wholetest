@@ -45,14 +45,14 @@ link_directories(
         ${PATH}/libs/armeabi-v7a
 )
 
-add_library(
-        ${FORK_ENGIN} SHARED
-        ${SRCS_LIST}
-)
-#add_executable(
-#        ${FORK_ENGIN}
+#add_library(
+#        ${FORK_ENGIN} SHARED
 #        ${SRCS_LIST}
 #)
+add_executable(
+        ${FORK_ENGIN}
+        ${SRCS_LIST}
+)
 
 find_library( # Sets the name of the path variable.
         log-lib
@@ -63,6 +63,7 @@ find_library( # Sets the name of the path variable.
         )
 target_link_libraries(${FORK_ENGIN}
         ${log-lib}
+#        pthread
         #        rt
         #        pthread
         #        stdc++

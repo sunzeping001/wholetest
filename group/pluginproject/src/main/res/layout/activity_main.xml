@@ -73,6 +73,30 @@
             app:layout_constraintBottom_toBottomOf="parent"
             android:text="nativeStart" />
 
+        <Button
+            android:id="@+id/runBinary"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toEndOf="@+id/nativeStart"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:text="runBinary" />
+
+        <Button
+            android:id="@+id/getAllProcess"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toEndOf="@+id/runBinary"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:text="getAllProcess" />
+
+        <Button
+            android:id="@+id/stopProcess"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toEndOf="@+id/getAllProcess"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:text="stopProcess" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 
