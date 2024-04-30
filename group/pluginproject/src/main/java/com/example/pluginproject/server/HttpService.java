@@ -20,7 +20,7 @@ public class HttpService extends Service {
 
     private static final String CHANNEL_ID = "119120";
     private static final CharSequence CHANNEL_NAME = "xsgg测试";
-    private static final int NOTIFICATION_ID = 8888;
+    private static final int NOTIFICATION_ID = 1;
     private NotificationManager notificationManager;
     private NotificationCompat.Builder notificationBuilder;
     private static final String TAG = "HttpService";
@@ -75,6 +75,7 @@ public class HttpService extends Service {
                 .setOngoing(true)
                 .setAutoCancel(false);
         createNotificationChannel();
+        startForeground(NOTIFICATION_ID, notificationBuilder.build());
     }
 
     @Override
@@ -86,8 +87,8 @@ public class HttpService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         doWork();
-        startForeground(NOTIFICATION_ID, notificationBuilder.build());
-        return START_NOT_STICKY;
+//        startForeground(NOTIFICATION_ID, notificationBuilder.build());
+        return START_STICKY;
     }
 
     @Override

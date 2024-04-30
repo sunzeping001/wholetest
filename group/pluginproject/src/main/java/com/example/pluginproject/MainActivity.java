@@ -1,5 +1,7 @@
 package com.example.pluginproject;
 
+import static com.example.pluginproject.util.Constans.LOGCATINTERVALTIME;
+
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -25,15 +27,17 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity {
 
     private TextView show;
-    private Button start;
-    private Button startServer;
-    private Button stopServer;
-    private Button nativeStart;
-    private Button runBinary;
-    private Button getAllProcess;
-    private Button stopProcess;
+    private Button btn_start;
+    private Button btn_startServer;
+    private Button btn_stopServer;
+    private Button btn_nativeStart;
+    private Button btn_runBinary;
+    private Button btn_getAllProcess;
+    private Button btn_stopProcess;
+    private Button btn_logcat;
+    private boolean isShow_net = false;
+    private boolean isShow_logcat = false;
     private List<Integer> processList = new ArrayList<>();
-
     private static final String TAG = "MainActivity";
 
     @Override
@@ -45,52 +49,56 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void copyBinary() {
-        new Thread(new Runnable() {
+        Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
                 FileUtils.copyAssertsFiles(MainActivity.this, "fork_engin", "fork_engin");
             }
-        }).start();
+        });
+        thread.setName("xsgg_copyBinary_thread");
+        thread.start();
     }
 
     private void initView() {
         show = findViewById(R.id.show);
-        start = findViewById(R.id.start);
-        startServer = findViewById(R.id.startServer);
-        stopServer = findViewById(R.id.stopServer);
-        nativeStart = findViewById(R.id.nativeStart);
-        runBinary = findViewById(R.id.runBinary);
-        getAllProcess = findViewById(R.id.getAllProcess);
-        stopProcess = findViewById(R.id.stopProcess);
-        start.setOnClickListener(new View.OnClickListener() {
+        btn_start = findViewById(R.id.start);
+        btn_startServer = findViewById(R.id.startServer);
+        btn_stopServer = findViewById(R.id.stopServer);
+        btn_nativeStart = findViewById(R.id.nativeStart);
+        btn_runBinary = findViewById(R.id.runBinary);
+        btn_getAllProcess = findViewById(R.id.getAllProcess);
+        btn_stopProcess = findViewById(R.id.stopProcess);
+        btn_logcat = findViewById(R.id.logcat);
+        btn_start.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 //                start();
+                isShow_net = true;
+                isShow_logcat = false;
                 collect();
             }
         });
-        startServer.setOnClickListener(new View.OnClickListener() {
+        btn_startServer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(MainActivity.this, HttpService.class);
                 ContextCompat.startForegroundService(MainActivity.this, intent);
             }
         });
-        stopServer.setOnClickListener(new View.OnClickListener() {
+        btn_stopServer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(MainActivity.this, HttpService.class);
                 stopService(intent);
             }
         });
-        nativeStart.setOnClickListener(new View.OnClickListener() {
+        btn_nativeStart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                StringBuffer result = new StringBuffer();
-                new Thread(new Runnable() {
+                Thread thread = new Thread(new Runnable() {
                     @Override
                     public void run() {
-                        result.append(NativeStarter.getInstance().start());
+                        String result = NativeStarter.getInstance().start();
                         MainActivity.this.runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
@@ -98,36 +106,78 @@ public class MainActivity extends AppCompatActivity {
                             }
                         });
                     }
-                }).start();
+                });
+                thread.setName("xsgg_startNative_thread");
+                thread.start();
             }
         });
-        runBinary.setOnClickListener(new View.OnClickListener() {
+        btn_runBinary.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 runBinary();
             }
         });
-        getAllProcess.setOnClickListener(new View.OnClickListener() {
+        btn_getAllProcess.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 checkAllProcess();
             }
         });
-        stopProcess.setOnClickListener(new View.OnClickListener() {
+        btn_stopProcess.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 stopAllProcess();
             }
         });
+        btn_logcat.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                isShow_logcat = true;
+                isShow_net = false;
+                getLogcat();
+            }
+        });
+    }
+
+    private void getLogcat() {
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (isShow_logcat) {
+                    try {
+                        StringBuffer sb = new StringBuffer();
+                        ProcessUtil.getLogcatInfo(sb);
+                        MainActivity.this.runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                show.setText(sb.toString());
+                            }
+                        });
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
+                    try {
+                        Thread.sleep(LOGCATINTERVALTIME);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+            }
+        });
+        thread.setName("logcat_thread");
+        thread.start();
     }
 
     private void stopAllProcess() {
-        new Thread(new Runnable() {
+        Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
                 ProcessUtil.stopAllProcess(processList);
             }
-        }).start();
+        });
+        thread.setName("xsgg_stopAllProcess_thread");
+        thread.start();
     }
 
     private void checkAllProcess() {
@@ -136,12 +186,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void allProcess(int pid) {
-        new Thread(new Runnable() {
+        Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
-                ProcessUtil.getAllProcessInfo(pid, true);
+                ProcessUtil.getAllProcessInfo(pid);
             }
-        }).start();
+        });
+        thread.setName("xsgg_allProcess_thread");
+        thread.start();
     }
 
     /**
@@ -149,20 +201,23 @@ public class MainActivity extends AppCompatActivity {
      * 二进制程序在本目录下
      */
     private void runBinary() {
-        new Thread(new Runnable() {
+        Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
                 String fileName = MainActivity.this.getFilesDir().getAbsolutePath() + File.separator + "fork_engin";
+//                ProcessUtil.runBinary(ContextUtils.getInstance().getContext(), fileName, "fork");
                 ProcessUtil.runBinary(ContextUtils.getInstance().getContext(), fileName);
             }
-        }).start();
+        });
+        thread.setName("xsgg_runBinary_thread");
+        thread.start();
     }
 
     private void collect() {
-        new Thread(new Runnable() {
+        Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
-                while(true) {
+                while (isShow_net) {
                     String result = DeviceInfoUtil.updateTraffic(ContextUtils.getInstance().getContext());
                     MainActivity.this.runOnUiThread(new Runnable() {
                         @Override
@@ -170,13 +225,20 @@ public class MainActivity extends AppCompatActivity {
                             show.setText(result);
                         }
                     });
+//                    try {
+//                        Thread.sleep(1000);
+//                    } catch (InterruptedException e) {
+//                        e.printStackTrace();
+//                    }
                 }
             }
-        }).start();
+        });
+        thread.setName("xsgg_collect_thread");
+        thread.start();
     }
 
     private void start() {
-        new Thread(new Runnable() {
+        Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
                 while (true) {
@@ -200,6 +262,8 @@ public class MainActivity extends AppCompatActivity {
 //                    }
 //                });
             }
-        }).start();
+        });
+        thread.setName("xsgg_start_query_qq_thread");
+        thread.start();
     }
 }

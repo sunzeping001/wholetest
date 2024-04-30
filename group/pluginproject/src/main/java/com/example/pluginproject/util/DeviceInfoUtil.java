@@ -11,6 +11,7 @@ import com.example.pluginproject.MainActivity;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 
 public class DeviceInfoUtil {
@@ -91,13 +92,16 @@ public class DeviceInfoUtil {
         Log.i(TAG, "当前进程使用内存：" + totalPss);
     }
 
+//    private static long lastDownloadBytes = 0;
+//    private static long lastUploadBytes = 0;
+
     /**
      * 更新带宽数据信息
      */
     public static String updateTraffic(Context context) {
+        String result = "";
         long lastDownloadBytes = 0;
         long lastUploadBytes = 0;
-        String result = "";
         try {
             if (lastDownloadBytes == 0) {
                 lastDownloadBytes = TrafficStats.getUidRxBytes(context.getApplicationInfo().uid);
@@ -116,18 +120,22 @@ public class DeviceInfoUtil {
             lastUploadBytes = newUploadSpeed;
 
             StringBuffer sb = new StringBuffer();
-            double dl = diffDownloadBytes * 8.0 / 1024 / 1024;
-            double upl = diffUploadBytes * 8.0 / 1024 / 1024;
+            // 计算带宽
+//            double dl = diffDownloadBytes * 8.0 / 1024 / 1024;
+//            double upl = diffUploadBytes * 8.0 / 1024 / 1024;
+            // 计算网速
+            double dl = diffDownloadBytes *1.0 / 1024;
+            double upl = diffUploadBytes * 1.0 / 1024;
             String diffDL = String.format("%.4f", dl);
             String diffUPL = String.format("%.4f", upl);
-            sb.append("Download speed: " + diffDL + " Mbps\n");
-            sb.append("Upload speed: " + diffUPL + " Mbps\n");
+            sb.append("Download speed: " + diffDL + " Kbps\n");
+            sb.append("Upload speed: " + diffUPL + " kbps\n");
 
             getMemoryInfo(context, sb);
-             getThreadCount(sb);
+            getThreadCount(sb);
             storageRW(sb);
             result = sb.toString();
-        } catch (InterruptedException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return result;

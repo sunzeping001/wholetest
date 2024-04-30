@@ -22,6 +22,9 @@
             android:enabled="true"
             android:exported="true"
             android:process=":remotev">
+            <intent-filter>
+                <action android:name="com.xsgg.test.Service" />
+            </intent-filter>
 
         </service>
 
@@ -38,6 +41,16 @@
                 android:name="android.app.lib_name"
                 android:value="" />
         </activity>
+
+        <receiver
+            android:name=".broadcast.MyBroadReceiver"
+            android:process=":remote"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.example.broadcasttest.MY_BROADCAST" />
+            </intent-filter>
+
+        </receiver>
     </application>
 
 </manifest>

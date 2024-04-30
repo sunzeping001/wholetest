@@ -1,5 +1,7 @@
 package com.example.pluginproject.util;
 
+import static com.example.pluginproject.util.Constans.LOGCATINTERVALTIME;
+
 import android.content.Context;
 import android.util.Log;
 
@@ -37,7 +39,7 @@ public class ProcessUtil {
             }
             StringBuffer sb = new StringBuffer();
             for (String param : params) {
-                sb.append(param + " ");
+                sb.append(" " + param + " ");
             }
             Process process = Runtime.getRuntime().exec("./" + fileName + sb.toString());
             int pid = getProcessId(process);
@@ -101,18 +103,12 @@ public class ProcessUtil {
      *
      * @param pid 父进程的pid
      */
-    public static List<Integer> getAllProcessInfo(int pid, boolean isPrint) {
+    public static List<Integer> getAllProcessInfo(int pid) {
         List<Integer> processList = new ArrayList<>();
         try {
             ProcessBuilder processBuilder;
             //查看进程归属测试用的
-            if (isPrint) {
-                processBuilder = new ProcessBuilder("sh", "-c", "ps -ef | awk -F \" \" '{print $2,$3,$7,$8}'");
-            } else {
-                processBuilder = new ProcessBuilder("sh", "-c", "ps -ef | awk -F \" \" '{print " +
-                        "$2}'");
-            }
-            Log.d(TAG, "cmd is " + processBuilder.command().toString());
+            processBuilder = new ProcessBuilder("sh", "-c", "ps -ef | awk -F \" \" '{print $2,$3,$8}'");
             Process process = processBuilder.start();
             // 读取命令执行的输出
             InputStreamReader inputStreamReader = new InputStreamReader(process.getInputStream());
@@ -122,13 +118,13 @@ public class ProcessUtil {
                 // 处理命令执行的输出
                 Log.i(TAG, line);
                 try {
-                    if (isPrint) {
-                        int result = Integer.parseInt(line);
-                        if (result != pid) {
-                            processList.add(result);
-                        }
+                    String[] info = line.split(" ");
+                    int result = Integer.parseInt(info[0]);
+                    if (result != pid && !info[2].contains("ps") && !info[2].contains("awk") && !info[2].contains("sh"
+                    )) {
+                        processList.add(result);
                     }
-                } catch (NumberFormatException ex) {
+                } catch (Exception ex) {
                     Log.e(TAG, "is not number");
                 }
             }
@@ -140,13 +136,13 @@ public class ProcessUtil {
 
     /**
      * 停止所有进程
+     *
      * @param processList
      */
     public static void stopAllProcess(List<Integer> processList) {
         try {
             for (int i = 0; i < processList.size(); i++) {
-                ProcessBuilder processBuilder = new ProcessBuilder("kill", "-9",
-                        Integer.toString(processList.get(i)));
+                ProcessBuilder processBuilder = new ProcessBuilder("kill", "-9", Integer.toString(processList.get(i)));
                 Process process = processBuilder.start();
                 Log.d(TAG, "stopAllProcess: pid is: " + processList.get(i));
             }
@@ -155,5 +151,45 @@ public class ProcessUtil {
         }
     }
 
+    public static void getLogcatInfo(StringBuffer sb) {
+        int parentProcessId = android.os.Process.myPid();
+        List<Integer> list = ProcessUtil.getAllProcessInfo(parentProcessId);
+        List<String> info = ProcessUtil.getPidLogInfo(list);
+        for (String in : info) {
+            sb.append(in + "\n");
+        }
+    }
+
+    private static List<String> getPidLogInfo(List<Integer> pids) {
+        List<String> result = new ArrayList<>();
+        try {
+            for (int i = 0; i < pids.size(); i++) {
+                int count = 0;
+//                ProcessBuilder processBuilder = new ProcessBuilder("logcat", "-d", "-t", "10", "grep " + pids.get(i),
+//                        "wc -l");
+                String cmd = "logcat -d -t " + LOGCATINTERVALTIME / 1000 + " | grep " + pids.get(i) + " | wc -m";
+                ProcessBuilder processBuilder = new ProcessBuilder("sh", "-c", cmd);
+                Process process = processBuilder.start();
+                // 读取命令执行的输出
+                InputStreamReader inputStreamReader = new InputStreamReader(process.getInputStream());
+                LineNumberReader lineNumberReader = new LineNumberReader(inputStreamReader);
+                String line;
+                while ((line = lineNumberReader.readLine()) != null) {
+                    // 处理命令执行的输出
+                    try {
+                        count = Integer.parseInt(line);
+                    } catch (NumberFormatException ex) {
+                        Log.e(TAG, "getPidLogInfo error: " + line);
+                    }
+                }
+                String speed = String.format("%.5f", count * 1.0 / LOGCATINTERVALTIME / 1024);
+                result.add("pid is: " + pids.get(i) + ", logcat size is: " + count + ", write speed: " + speed + "KB" +
+                        "/s");
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        return result;
+    }
 
 }
