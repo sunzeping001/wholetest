@@ -116,9 +116,6 @@ public class DeviceInfoUtil {
             long diffDownloadBytes = newDownloadSpeed - lastDownloadBytes;
             long diffUploadBytes = newUploadSpeed - lastUploadBytes;
 
-            lastDownloadBytes = newDownloadSpeed;
-            lastUploadBytes = newUploadSpeed;
-
             StringBuffer sb = new StringBuffer();
             // 计算带宽
 //            double dl = diffDownloadBytes * 8.0 / 1024 / 1024;
@@ -133,7 +130,7 @@ public class DeviceInfoUtil {
 
             getMemoryInfo(context, sb);
             getThreadCount(sb);
-            storageRW(sb);
+//            storageRW(sb);
             result = sb.toString();
         } catch (Exception e) {
             e.printStackTrace();

@@ -41,7 +41,6 @@ void request() {
             curl_easy_cleanup(curl);
         }
         curl_global_cleanup();
-        sleep(1);
     }
 }
 

@@ -68,4 +68,6 @@ dependencies {
     implementation 'com.squareup.okhttp3:okhttp:3.9.0'
     implementation 'com.squareup.okhttp3:logging-interceptor:3.9.0'
     implementation 'com.google.code.gson:gson:2.10.1'
+    implementation 'io.reactivex.rxjava2:rxjava:2.0.8'       //RxJava 的jar包
+    implementation 'io.reactivex.rxjava2:rxandroid:2.0.1'
 }

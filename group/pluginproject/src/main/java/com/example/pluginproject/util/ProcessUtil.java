@@ -182,7 +182,7 @@ public class ProcessUtil {
                         Log.e(TAG, "getPidLogInfo error: " + line);
                     }
                 }
-                String speed = String.format("%.5f", count * 1.0 / LOGCATINTERVALTIME / 1024);
+                String speed = String.format("%.5f", count * 1000.0 / LOGCATINTERVALTIME / 1024);
                 result.add("pid is: " + pids.get(i) + ", logcat size is: " + count + ", write speed: " + speed + "KB" +
                         "/s");
             }
