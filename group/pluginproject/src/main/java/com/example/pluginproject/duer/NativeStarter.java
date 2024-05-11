@@ -21,6 +21,6 @@ public class NativeStarter {
         return starter;
     }
 
-    public native String start();
+    public native String start(String logPath);
 
 }

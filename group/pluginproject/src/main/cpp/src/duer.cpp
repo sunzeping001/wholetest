@@ -5,6 +5,7 @@
 #include <cstdlib>
 #include <cstdio>
 #include "fork_log.h"
+#include "vdplive.h"
 
 //extern "C" JNIEXPORT jstring JNICALL
 //Java_com_example_pluginlib_NativeLib_stringFromJNI(
@@ -15,8 +16,12 @@
 //}
 extern "C"
 JNIEXPORT jstring JNICALL
-Java_com_example_pluginproject_duer_NativeStarter_start(JNIEnv *env, jobject thiz) {
+Java_com_example_pluginproject_duer_NativeStarter_start(JNIEnv *env, jobject thiz, jstring logPath) {
     // TODO: implement start()
-    std::string result = work_run();
-    return env->NewStringUTF(result.c_str());
+//    std::string result = work_run();
+    const char *log_path = env->GetStringUTFChars(logPath, 0);
+    std::string log_work = std::string(log_path);
+    run(log_work);
+    env->ReleaseStringUTFChars(logPath, log_path);
+    return env->NewStringUTF("hello");
 }

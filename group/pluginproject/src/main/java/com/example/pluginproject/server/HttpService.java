@@ -14,6 +14,7 @@ import androidx.core.app.NotificationCompat;
 
 import com.example.pluginproject.R;
 import com.example.pluginproject.duer.NativeStarter;
+import com.example.pluginproject.util.ContextUtils;
 import com.example.pluginproject.util.HttpClient;
 
 public class HttpService extends Service {
@@ -50,7 +51,7 @@ public class HttpService extends Service {
             while (true) {
                 Log.i(TAG, "xsgg---server start while---");
                 try {
-                    NativeStarter.getInstance().start();
+                    NativeStarter.getInstance().start(ContextUtils.getInstance().getContext().getCacheDir().getAbsolutePath());
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }
@@ -68,12 +69,8 @@ public class HttpService extends Service {
     public void onCreate() {
         super.onCreate();
         notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        notificationBuilder = new NotificationCompat.Builder(this, CHANNEL_ID)
-                .setContentTitle(getString(R.string.app_name))
-                .setContentText("服务启动了哈")
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                .setOngoing(true)
-                .setAutoCancel(false);
+        notificationBuilder =
+                new NotificationCompat.Builder(this, CHANNEL_ID).setContentTitle(getString(R.string.app_name)).setContentText("服务启动了哈").setPriority(NotificationCompat.PRIORITY_DEFAULT).setOngoing(true).setAutoCancel(false);
         createNotificationChannel();
         startForeground(NOTIFICATION_ID, notificationBuilder.build());
     }

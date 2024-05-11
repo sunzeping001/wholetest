@@ -156,7 +156,7 @@ public class MainActivity extends AppCompatActivity {
                 Observable.create(new ObservableOnSubscribe<String>() {
                             @Override
                             public void subscribe(ObservableEmitter<String> e) throws Exception {
-                                String result = NativeStarter.getInstance().start();
+                                String result = NativeStarter.getInstance().start(ContextUtils.getInstance().getContext().getCacheDir().getAbsolutePath());
                                 e.onNext(result);
                             }
                         })

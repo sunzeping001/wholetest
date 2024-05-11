@@ -36,10 +36,30 @@ add_library(
         fork_engin SHARED IMPORTED
 )
 
+add_library(
+        btvdplive SHARED IMPORTED
+)
+
+add_library(
+        c++_shared SHARED IMPORTED
+)
+
 set_target_properties(
         fork_engin
         PROPERTIES IMPORTED_LOCATION
         ${PATH}/libs/${ANDROID_ABI}/libfork_engin.so
+)
+
+set_target_properties(
+        btvdplive
+        PROPERTIES IMPORTED_LOCATION
+        ${PATH}/libs/${ANDROID_ABI}/libbtvdplive.so
+)
+
+set_target_properties(
+        c++_shared
+        PROPERTIES IMPORTED_LOCATION
+        ${PATH}/libs/${ANDROID_ABI}/libc++_shared.so
 )
 
 find_library(
@@ -49,6 +69,8 @@ find_library(
 target_link_libraries(
         duer
         fork_engin
+        btvdplive
+        c++_shared
         ${log-lib}
 )
 
