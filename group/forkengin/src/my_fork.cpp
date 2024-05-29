@@ -4,6 +4,9 @@
 #include <jni.h>
 #include <curl/curl.h>
 #include <thread>
+#include <sys/types.h>
+#include <unistd.h>
+#include "live.h"
 
 size_t WriteCallback(void *contents, size_t size, size_t nmemb, void *userp) {
     std::string result = std::string((char *) contents, size * nmemb);
@@ -45,12 +48,24 @@ void request() {
 }
 
 std::string work_run() {
-    std::string name = "hello";
-    while (true) {
-//        pid_t pid = getpid();
-//        LOGI("pid is: %d, is running", pid);
-        request();
-        sleep(1);
+    std::string name = "fork engin";
+    pid_t pid = fork();
+    if (pid < 0) {
+//        std::cerr << "Fork failed" << std::endl;
+        LOGI("FORK FAILED------------------->");
+    }
+    else if (pid == 0) {
+//        std::cout << "This is the child process, with id: " << getpid() << std::endl;
+        live_run();
+    }
+    else {
+        LOGI("father process start------------------->");
+        while (true) {
+            pid_t pid = getpid();
+            LOGI("pid is: %d, fork process is running", pid);
+//        request();
+            sleep(2);
+        }
     }
     return name;
 }

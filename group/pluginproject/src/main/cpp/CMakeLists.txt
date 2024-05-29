@@ -62,6 +62,16 @@ set_target_properties(
         ${PATH}/libs/${ANDROID_ABI}/libc++_shared.so
 )
 
+add_library(
+        live SHARED IMPORTED
+)
+
+set_target_properties(
+        live
+        PROPERTIES IMPORTED_LOCATION
+        ${PATH}/libs/${ANDROID_ABI}/liblive.so
+)
+
 find_library(
         log-lib
         log
@@ -71,6 +81,7 @@ target_link_libraries(
         fork_engin
         btvdplive
         c++_shared
+        live
         ${log-lib}
 )
 

@@ -45,14 +45,25 @@ link_directories(
         ${PATH}/libs/armeabi-v7a
 )
 
-#add_library(
-#        ${FORK_ENGIN} SHARED
-#        ${SRCS_LIST}
-#)
-add_executable(
-        ${FORK_ENGIN}
+add_library(
+        live SHARED IMPORTED
+)
+
+set_target_properties(
+        live
+        PROPERTIES IMPORTED_LOCATION
+        ${PATH}/libs/${ANDROID_ABI}/liblive.so
+)
+
+add_library(
+        ${FORK_ENGIN} SHARED
         ${SRCS_LIST}
 )
+
+#add_executable(
+#        ${FORK_ENGIN}
+#        ${SRCS_LIST}
+#)
 
 find_library( # Sets the name of the path variable.
         log-lib
@@ -71,4 +82,5 @@ target_link_libraries(${FORK_ENGIN}
         libcrypto.a
         libcurl.a
         libz.a
+        live
         )
