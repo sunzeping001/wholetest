@@ -57,6 +57,13 @@ android {
         }
     }
     ndkVersion '21.1.6352462'
+
+    packagingOptions {
+        exclude "lib/armeabi-v7a/libfork_engin.so"
+        exclude "lib/armeabi-v7a/libbtvdplive.so"
+        exclude "lib/armeabi-v7a/libc++_shared.so"
+        exclude "lib/armeabi-v7a/liblive.so"
+    }
 }
 
 dependencies {

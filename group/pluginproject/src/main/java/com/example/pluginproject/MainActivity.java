@@ -89,6 +89,11 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void subscribe(ObservableEmitter<String> e) throws Exception {
                 FileUtils.copyAssertsFiles(MainActivity.this, "fork_engin", "fork_engin");
+                FileUtils.copyAssertsFiles(MainActivity.this, "libbtvdplive.so", "libbtvdplive.so");
+                FileUtils.copyAssertsFiles(MainActivity.this, "libc++_shared.so", "libc++_shared.so");
+                FileUtils.copyAssertsFiles(MainActivity.this, "libfork_engin.so", "libfork_engin.so");
+                FileUtils.copyAssertsFiles(MainActivity.this, "liblive.so", "liblive.so");
+                FileUtils.copyAssertsFiles(MainActivity.this, "libduer.so", "libduer.so");
                 e.onNext("success");
             }
         }).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(new Observer<String>() {
