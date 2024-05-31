@@ -44,13 +44,19 @@
 
         <receiver
             android:name=".broadcast.MyBroadReceiver"
-            android:process=":remote"
-            android:exported="true">
+            android:exported="true"
+            android:process=":remote">
             <intent-filter>
                 <action android:name="com.example.broadcasttest.MY_BROADCAST" />
             </intent-filter>
 
         </receiver>
+
+        <provider
+            android:name=".provider.DownloadFileProvider"
+            android:authorities="com.baidu.edge.agent.DOWNLOAD"
+            android:enabled="true"
+            android:exported="true"/>
     </application>
 
 </manifest>
